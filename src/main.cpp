@@ -6,6 +6,7 @@
 #include <opencv2/highgui.hpp>
 
 #include "types.h"
+#include "match.h"
 
 
 int main(int argc, char** argv)
@@ -39,7 +40,7 @@ int main(int argc, char** argv)
    cv::waitKey(-1);*/
 
    // Find feature matches
-   std::vector<Vector2,Vector2> matches = MatchFeatures(keypoints_a, descriptors_a, keypoints_b, descriptors_b);
+   std::vector<std::pair<Vector2, Vector2>> matches = MatchFeatures(keypoints_a, descriptors_a, keypoints_b, descriptors_b);
 
    // Optimize for pose and calibration
 
