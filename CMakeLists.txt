@@ -11,7 +11,7 @@ add_executable(autocalibrate
 	src/types.h
 	src/match.h
 	src/match.cpp
-)
+ "src/autocalibrate.h" "src/autocalibrate.cpp")
 
 target_include_directories(autocalibrate PRIVATE
 	${OpenCV_INCLUDE_DIRS}

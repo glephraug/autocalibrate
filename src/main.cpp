@@ -7,6 +7,7 @@
 
 #include "types.h"
 #include "match.h"
+#include "autocalibrate.h"
 
 
 int main(int argc, char** argv)
@@ -43,6 +44,17 @@ int main(int argc, char** argv)
    std::vector<std::pair<Vector2, Vector2>> matches = MatchFeatures(keypoints_a, descriptors_a, keypoints_b, descriptors_b);
 
    // Optimize for pose and calibration
+   Matrix33 rotation = Matrix33::Identity();
+   Vector3 translation = Vector3(0.0, 0.0, 1.0);
+   Vector2 center = Vector2(image_a.cols/2, image_a.rows/2);
+   double focal = 1e3;
+
+   Autocalibrate(matches, rotation, translation, center, focal);
+
+   std::cout << "Estimated rotation:" << std::endl << rotation << std::endl;
+   std::cout << "Estimated translation: " << translation.transpose() << std::endl;
+   std::cout << "Principal point: " << center.transpose() << std::endl;
+   std::cout << "Focal length: " << focal << std::endl;
 
    return 0;
 }
