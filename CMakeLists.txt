@@ -8,10 +8,14 @@ find_package(OpenCV REQUIRED)
 
 add_executable(autocalibrate
 	src/main.cpp
+	src/types.h
+	src/match.h
+	src/match.cpp
 )
 
 target_include_directories(autocalibrate PRIVATE
 	${OpenCV_INCLUDE_DIRS}
+	${EIGEN3_INCLUDE_DIR}
 )
 
 target_link_libraries(autocalibrate
