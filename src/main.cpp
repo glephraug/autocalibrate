@@ -4,6 +4,7 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 
 #include "types.h"
 #include "match.h"
@@ -23,6 +24,12 @@ int main(int argc, char** argv)
 
    cv::Mat3b image_a = cv::imread(argv[1]);
    cv::Mat3b image_b = cv::imread(argv[2]);
+
+   double scale = std::min(1.0, 480.0/image_a.rows);
+
+   cv::resize(image_a, image_a, cv::Size(), scale, scale);
+   cv::resize(image_b, image_b, cv::Size(), scale, scale);
+
 
    // Detect features in both images
    cv::Ptr<cv::SIFT> detector = cv::SIFT::create();
