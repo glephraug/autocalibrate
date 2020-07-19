@@ -62,7 +62,8 @@ std::vector<std::pair<Vector2, Vector2>> MatchFeatures(
    const std::vector<cv::KeyPoint> & keypoints_b,
    const cv::Mat1f & descriptors_b
 ){
-   const double max_feature_distance = 1e4;
+   const double max_feature_distance = 1e4; // SIFT feature space
+   const double inlier_distance = 5.0; // pixels
 
    // find initial matches via brute force
    std::cout << "Find initial matches..." << std::endl;
@@ -103,6 +104,35 @@ std::vector<std::pair<Vector2, Vector2>> MatchFeatures(
 
    // find matches constrained by fundamental matrix
    std::vector<std::pair<Vector2, Vector2>> final_matches;
+
+   for (int i = 0; i < keypoints_a.size(); ++i)
+   {
+      int best_index = -1;
+      double best_distance = max_feature_distance;
+
+      Vector2 va(keypoints_a[i].pt.x, keypoints_a[i].pt.y);
+
+      for (int j = 0; j < keypoints_b.size(); ++j)
+      {
+         Vector2 vb(keypoints_b[j].pt.x, keypoints_b[j].pt.y);
+         if(FundamentalError(F, va, vb) <= inlier_distance)
+         {
+            double distance = cv::norm(descriptors_a.row(i) - descriptors_b.row(j), cv::NORM_L2SQR);
+            if (distance <= best_distance)
+            {
+               best_distance = distance;
+               best_index = j;
+            }
+         }
+      }
+
+      if (best_index >= 0)
+      {
+         final_matches.emplace_back(va, Vector2(keypoints_b[best_index].pt.x, keypoints_b[best_index].pt.y));
+      }
+   }
+   std::cout << "Found " << final_matches.size() << " final matches" << std::endl;
+
 
    return final_matches;
 }

@@ -43,6 +43,7 @@ int main(int argc, char** argv)
 
    // Find feature matches
    auto matches = MatchFeatures(keypoints_a, descriptors_a, keypoints_b, descriptors_b);
+   cv::imshow("matches", RenderMatches(image_a, image_b, matches));
    if(matches.size() < 8)
    {
       std::cout << "Couldn't find enough feature matches, giving up!" << std::endl;
