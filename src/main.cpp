@@ -54,21 +54,22 @@ int main(int argc, char** argv)
    // Optimize for pose and calibration
    // We could pull good initial guesses out of the fundamental matrix found in
    // the previous step if we wanted to improve results.
-   Matrix33 rotation = Matrix33::Identity();
-   Vector3 translation = Vector3(0.0, 0.0, 1.0);
-   Vector2 center = Vector2(image_a.cols/2, image_a.rows/2);
-   double focal = 1e3;
+   Model model;
+   model.rotation = Matrix33::Identity();
+   model.translation = Vector3(0.0, 0.0, 1.0);
+   model.center = Vector2(image_a.cols/2, image_a.rows/2);
+   model.focal = 1e3;
 
-   Autocalibrate(matches, rotation, translation, center, focal);
+   Autocalibrate(matches, model);
    
    // Undo the scaling so our data matches the original image sizes
-   center /= scale;
-   focal /= scale;
+   model.center /= scale;
+   model.focal /= scale;
 
-   std::cout << "Estimated rotation:" << std::endl << rotation << std::endl;
-   std::cout << "Estimated translation: " << translation.transpose() << std::endl;
-   std::cout << "Principal point: " << center.transpose() << std::endl;
-   std::cout << "Focal length: " << focal << std::endl;
+   std::cout << "Estimated rotation:" << std::endl << model.rotation << std::endl;
+   std::cout << "Estimated translation: " << model.translation.transpose() << std::endl;
+   std::cout << "Principal point: " << model.center.transpose() << std::endl;
+   std::cout << "Focal length: " << model.focal << std::endl;
 
    return 0;
 }
