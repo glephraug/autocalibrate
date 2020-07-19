@@ -45,6 +45,8 @@ int main(int argc, char** argv)
    auto matches = MatchFeatures(keypoints_a, descriptors_a, keypoints_b, descriptors_b);
 
    // Optimize for pose and calibration
+   // We could pull good initial guesses out of the fundamental matrix found in
+   // the previous step if we wanted to improve results.
    Matrix33 rotation = Matrix33::Identity();
    Vector3 translation = Vector3(0.0, 0.0, 1.0);
    Vector2 center = Vector2(image_a.cols/2, image_a.rows/2);

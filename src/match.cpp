@@ -5,6 +5,22 @@
 
 #include <opencv2/imgproc.hpp>
 
+#include "fundamental.h"
+
+
+Matrix33 FundamentalRansac(
+   const std::vector<std::pair<Vector2, Vector2>> & data
+){
+   const int iterations = 100;
+
+   int max_inliers = 0;
+   Matrix33 best;
+   for(int i = 0; i < iterations; ++i)
+   {
+
+   }
+}
+
 
 std::vector<std::pair<Vector2, Vector2>> MatchFeatures(
    const std::vector<cv::KeyPoint>& keypoints_a,
@@ -42,7 +58,6 @@ std::vector<std::pair<Vector2, Vector2>> MatchFeatures(
       }
    }
    std::cout << "Found " << initial_matches.size() << " initial matches" << std::endl;
-
 
    // use ransac to find a decent fundamental matrix
    //
