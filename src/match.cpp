@@ -43,6 +43,7 @@ std::vector<std::pair<Vector2, Vector2>> MatchFeatures(
    }
    std::cout << "Found " << initial_matches.size() << " initial matches" << std::endl;
 
+
    // use ransac to find a decent fundamental matrix
    //
 

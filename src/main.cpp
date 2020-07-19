@@ -25,7 +25,9 @@ int main(int argc, char** argv)
    cv::Mat3b image_a = cv::imread(argv[1]);
    cv::Mat3b image_b = cv::imread(argv[2]);
 
-   // Scale down the images to something more managable
+   // Scale down the images to something more managable.
+   // We could probably get a better calibration by using features detected at a higher
+   // resolution.
    double scale = std::min(1.0, 480.0/image_a.rows);
    cv::resize(image_a, image_a, cv::Size(), scale, scale);
    cv::resize(image_b, image_b, cv::Size(), scale, scale);
@@ -39,17 +41,8 @@ int main(int argc, char** argv)
    detector->detectAndCompute(image_b, cv::noArray(), keypoints_b, descriptors_b);
    std::cout << "Found " << keypoints_b.size() << " keypoints in image B" << std::endl;
 
-   /*cv::Mat3b draw_a, draw_b;
-   cv::drawKeypoints(image_a, keypoints_a, draw_a);
-   cv::drawKeypoints(image_b, keypoints_b, draw_b);
-   cv::imshow("points_a", draw_a);
-   cv::imshow("points_b", draw_b);
-   cv::waitKey(-1);*/
-
    // Find feature matches
-   std::vector<std::pair<Vector2, Vector2>> matches = MatchFeatures(keypoints_a, descriptors_a, keypoints_b, descriptors_b);
-   cv::imshow("matches", RenderMatches(image_a, image_b, matches));
-   cv::waitKey(-1);
+   auto matches = MatchFeatures(keypoints_a, descriptors_a, keypoints_b, descriptors_b);
 
    // Optimize for pose and calibration
    Matrix33 rotation = Matrix33::Identity();
