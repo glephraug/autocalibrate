@@ -49,6 +49,27 @@ void ModelError(
    }
 
    // accumulate errors from matches
+   for(const auto & m : matches)
+   {
+      const Vector2 & a = m.first;
+      const Vector2 & b = m.second;
+
+      // normalize coordinates
+      Vector3 na((a(0)-model.center(0))/model.focal, (a(1)-model.center(1))/model.focal, 1.0);
+      Vector3 nb((b(0)-model.center(0))/model.focal, (b(1)-model.center(1))/model.focal, 1.0);
+      Vector3 Rnb = model.rotation*nb;
+      const Vector3 & t = model.translation;
+
+      // The normalized and transformed points should all be coplanar with the cameras.
+      // This means the two planes defined by the camera centers and each point respectively
+      // should have the same normal. This is equivalent to the below error:
+
+      // double r = (na.cross(model.translation).dot(Rnb.cross(model.translation));
+
+      // This can be simplified to the following:
+
+      double r = na.dot(Rnb)*t.squaredNorm() - na.dot(t)*Rnb.dot(t);
+   }
 }
 
 
