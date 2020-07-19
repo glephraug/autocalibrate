@@ -18,7 +18,7 @@ Matrix33 FundamentalRansac(
    std::vector<std::pair<Vector2, Vector2>> & data
 ){
    const int iterations = 100;
-   const double inlier_distance = 5.0; // pixels
+   const double inlier_distance = 1.0; // pixels
 
    // We could use mersenne twister or something, but this project isn't really serious.
    std::default_random_engine gen;
@@ -63,7 +63,7 @@ std::vector<std::pair<Vector2, Vector2>> MatchFeatures(
    const cv::Mat1f & descriptors_b
 ){
    const double max_feature_distance = 1e4; // SIFT feature space
-   const double inlier_distance = 5.0; // pixels
+   const double inlier_distance = 1.0; // pixels
 
    // find initial matches via brute force
    std::cout << "Find initial matches..." << std::endl;
@@ -98,6 +98,8 @@ std::vector<std::pair<Vector2, Vector2>> MatchFeatures(
    {
       return std::vector<std::pair<Vector2,Vector2>>();
    }
+
+   // We could improve results by doing some kind of angle-based outlier rejection here
 
    // use ransac to find a decent fundamental matrix
    Matrix33 F = FundamentalRansac(initial_matches);

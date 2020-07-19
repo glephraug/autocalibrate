@@ -53,5 +53,5 @@ double FundamentalError(const Matrix33& F, const Vector2& a, const Vector2& b)
    lb /= lb.head<2>().norm();
 
    // Return whichever distance between point and epipolar line is higher
-   return std::max(ha.dot(lb), hb.dot(la));
+   return std::max(std::abs(ha.dot(lb)), std::abs(hb.dot(la)));
 }
