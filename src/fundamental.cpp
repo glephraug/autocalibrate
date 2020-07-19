@@ -22,7 +22,7 @@ Matrix33 FundamentalFromMatches(const std::vector<std::pair<Vector2, Vector2>> &
    }
 
    // Use svd to find F with least squared error
-   Eigen::JacobiSVD<Eigen::MatrixXd> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+   Eigen::JacobiSVD<Eigen::MatrixXd> svd(A, Eigen::ComputeThinU | Eigen::ComputeFullV);
 
    // Reshape last eigenvector into a matrix
    Eigen::VectorXd ev = svd.matrixV().col(8);
@@ -32,7 +32,7 @@ Matrix33 FundamentalFromMatches(const std::vector<std::pair<Vector2, Vector2>> &
    F.row(2) = ev.tail<3>().transpose();
 
    // Force internal fundamental matrix constraint
-   Eigen::JacobiSVD<Eigen::Matrix3d> svd3(F);
+   Eigen::JacobiSVD<Eigen::Matrix3d> svd3(F, Eigen::ComputeFullU | Eigen::ComputeFullV);
    Vector3 s = svd3.singularValues();
    s(2) = 0.0;
    F = svd3.matrixU() * s.asDiagonal() * svd3.matrixV().transpose();
