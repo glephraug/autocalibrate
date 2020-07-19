@@ -56,7 +56,7 @@ int main(int argc, char** argv)
    // the previous step if we wanted to improve results.
    Model model;
    model.rotation = Matrix33::Identity();
-   model.translation = Vector3(0.0, 0.0, 1.0);
+   model.translation = Vector3(1.0, 0.0, 0.0);
    model.center = Vector2(image_a.cols/2, image_a.rows/2);
    model.focal = 1e3;
 

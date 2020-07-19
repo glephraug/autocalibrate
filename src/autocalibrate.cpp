@@ -38,6 +38,15 @@ void ModelError(
    error = 0.0;
 
    // regularization error, keep translation to a unit vector
+   // this blows up when translation is zero, but it should never get there.
+   {
+      double l = model.translation.norm();
+      double r = l - 1.0;
+      Vector3 j = model.translation * (1.0/l);
+      JtJ.block<3,3>(3,3) += j*j.transpose();
+      Jtr.block<3,1>(3,0) += j*r;
+      error += 0.5*r*r;
+   }
 
    // accumulate errors from matches
 }
@@ -65,8 +74,6 @@ void Autocalibrate(
    Model & model
 ){
    const int iterations = 100;
-
-   // define error function
 
    // Levenberg Marquardt optimization
    double lambda = 1.0;
