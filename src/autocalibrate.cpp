@@ -135,7 +135,7 @@ void Autocalibrate(
    {
       // solve for lm step
       Matrix99 H = JtJ + (lambda*JtJ.diagonal()).asDiagonal().toDenseMatrix();
-      Eigen::JacobiSVD<Matrix99> solver(H);
+      Eigen::JacobiSVD<Matrix99> solver(H, Eigen::ComputeFullU | Eigen::ComputeFullV);
       Vector9 step = solver.solve(-Jtr);
 
       Model new_model = Apply(model, step);

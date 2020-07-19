@@ -43,8 +43,7 @@ int main(int argc, char** argv)
 
    // Find feature matches
    auto matches = MatchFeatures(keypoints_a, descriptors_a, keypoints_b, descriptors_b);
-   cv::imshow("matches", RenderMatches(image_a, image_b, matches));
-   cv::waitKey(0);
+
    if(matches.size() < 8)
    {
       std::cout << "Couldn't find enough feature matches, giving up!" << std::endl;
@@ -58,7 +57,7 @@ int main(int argc, char** argv)
    model.rotation = Matrix33::Identity();
    model.translation = Vector3(1.0, 0.0, 0.0);
    model.center = Vector2(image_a.cols/2, image_a.rows/2);
-   model.focal = 1e3;
+   model.focal = 100.0;
 
    Autocalibrate(matches, model);
    
