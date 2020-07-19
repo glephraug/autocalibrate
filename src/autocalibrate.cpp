@@ -1,14 +1,13 @@
 
 #include "autocalibrate.h"
 
+#include <iostream>
+
 
 Matrix33 MatrixFromAxisAngle(
    const Vector3 & v
 ){
-   Matrix33 K;
-   K(0,0) = 0.0;   K(0,1) = -v(2); K(0,2) = v(1);
-   K(1,0) = v(2);  K(1,1) = 0.0;   K(1,2) = -v(0);
-   K(2,0) = -v(1); K(2,1) = v(0);  K(2,2) = 0.0;
+   Matrix33 K = Hat(v);
 
    Matrix33 A = Matrix33::Identity();
    Matrix33 R = A;
@@ -53,22 +52,49 @@ void ModelError(
    {
       const Vector2 & a = m.first;
       const Vector2 & b = m.second;
+      const Matrix33 & R = model.rotation;
+      const Vector3 & t = model.translation;
+      const Vector2 & c = model.center;
+      double f2 = model.focal*model.focal;
+
+      // I'm sure a lot of this could be optimized much more efficiently
 
       // normalize coordinates
       Vector3 na((a(0)-model.center(0))/model.focal, (a(1)-model.center(1))/model.focal, 1.0);
       Vector3 nb((b(0)-model.center(0))/model.focal, (b(1)-model.center(1))/model.focal, 1.0);
-      Vector3 Rnb = model.rotation*nb;
-      const Vector3 & t = model.translation;
+      Vector3 Rnb = R*nb;
 
       // The normalized and transformed points should all be coplanar with the cameras.
-      // This means the two planes defined by the camera centers and each point respectively
-      // should have the same normal. This is equivalent to the below error:
+      // This means the rotated normalized points and baseline should all be coplanar,
+      // and their scalar triple product is zero.
 
-      // double r = (na.cross(model.translation).dot(Rnb.cross(model.translation));
+      double r = t.dot(na.cross(Rnb));
 
-      // This can be simplified to the following:
+      Eigen::Matrix<double,1,9> j;
 
-      double r = na.dot(Rnb)*t.squaredNorm() - na.dot(t)*Rnb.dot(t);
+      // rotation
+      j.head<3>() = t.cross(na).cross(Rnb).transpose();
+
+      // translation
+      j.block<1,3>(0,3) = na.cross(Rnb).transpose();
+
+      // principal point
+      Eigen::Matrix<double,3,2> dndc = Eigen::Matrix<double,3,2>::Zero();
+      dndc(0,0) = dndc(1,1) = -1.0/model.focal;
+
+      j.block<1,2>(0,6) = -t.cross(Rnb).transpose()*dndc; // drdc from a
+      j.block<1,2>(0,6) += t.cross(na).transpose()*R*dndc; // drdc from b
+
+      // focal length
+      Vector3 dnadf(-(a(0)-c(0))/f2, -(a(1)-c(1))/f2, 0.0);
+      Vector3 dnbdf(-(b(0)-c(0))/f2, -(b(1)-c(1))/f2, 0.0);
+
+      j(8) = -t.cross(Rnb).dot(dnadf); // drdf from a
+      j(8) += t.cross(na).dot(R*dnbdf); // drdf from b
+
+      JtJ += j.transpose()*j;
+      Jtr += j.transpose()*r;
+      error += 0.5*r*r;
    }
 }
 
@@ -103,6 +129,7 @@ void Autocalibrate(
    double error;
 
    ModelError(matches, model, JtJ, Jtr, error);
+   std::cout << "initial error: " << error << std::endl;
 
    for(int i = 0; i < iterations; ++i)
    {
@@ -118,6 +145,7 @@ void Autocalibrate(
       double new_error;
 
       ModelError(matches, new_model, new_JtJ, new_Jtr, new_error);
+      std::cout << "iteration " << i << " error: " << new_error << std::endl;
 
       if(new_error < error)
       {
