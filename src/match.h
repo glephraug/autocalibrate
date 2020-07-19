@@ -22,4 +22,9 @@ cv::Mat3b RenderMatches(
 );
 
 
+Matrix33 FundamentalRansac(
+   std::vector<std::pair<Vector2, Vector2>>& data
+);
+
+
 #endif

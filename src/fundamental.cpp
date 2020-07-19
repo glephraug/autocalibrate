@@ -46,7 +46,7 @@ double FundamentalError(const Matrix33& F, const Vector2& a, const Vector2& b)
    Vector3 ha(a(0), a(1), 1.0);
    Vector3 hb(b(0), b(1), 1.0);
    Vector3 la = F.transpose()*ha;
-   Vector3 lb = F*b;
+   Vector3 lb = F*hb;
 
    // normalize lines
    la /= la.head<2>().norm();

@@ -43,6 +43,11 @@ int main(int argc, char** argv)
 
    // Find feature matches
    auto matches = MatchFeatures(keypoints_a, descriptors_a, keypoints_b, descriptors_b);
+   if(matches.size() < 8)
+   {
+      std::cout << "Couldn't find enough feature matches, giving up!" << std::endl;
+      return 0;
+   }
 
    // Optimize for pose and calibration
    // We could pull good initial guesses out of the fundamental matrix found in

@@ -2,31 +2,65 @@
 #include "match.h"
 
 #include <iostream>
+#include <random>
 
 #include <opencv2/imgproc.hpp>
 
 #include "fundamental.h"
 
 
+/*
+   Find the best fundamental matrix via RANSAC.
+   We modify the data because it's just quicker and easier. All we do is change 
+   the order of some matches.
+*/
 Matrix33 FundamentalRansac(
-   const std::vector<std::pair<Vector2, Vector2>> & data
+   std::vector<std::pair<Vector2, Vector2>> & data
 ){
    const int iterations = 100;
+   const double inlier_distance = 5.0; // pixels
+
+   // We could use mersenne twister or something, but this project isn't really serious.
+   std::default_random_engine gen;
 
    int max_inliers = 0;
    Matrix33 best;
    for(int i = 0; i < iterations; ++i)
    {
+      // select 8 data points at random
+      std::vector<std::pair<Vector2,Vector2>> subset;
+      for(int j = 0; j < 8; ++j){
+         std::uniform_int_distribution<int> dist(j, data.size()-1);
+         int k = dist(gen);
+         std::swap(data[j], data[k]);
+         subset.push_back(data[j]);
+      }
 
+      Matrix33 F = FundamentalFromMatches(subset);
+      
+      int inliers = 0;
+      for(const auto & m : data)
+      {
+         if(FundamentalError(F, m.first, m.second) <= inlier_distance) ++inliers;
+      }
+
+      if(inliers > max_inliers)
+      {
+         std::cout << "Found " << inliers << " inliers on iteration " << i << std::endl;
+         max_inliers = inliers;
+         best = F;
+      }
    }
+
+   return best;
 }
 
 
 std::vector<std::pair<Vector2, Vector2>> MatchFeatures(
-   const std::vector<cv::KeyPoint>& keypoints_a,
-   const cv::Mat1f& descriptors_a,
-   const std::vector<cv::KeyPoint>& keypoints_b,
-   const cv::Mat1f& descriptors_b
+   const std::vector<cv::KeyPoint> & keypoints_a,
+   const cv::Mat1f & descriptors_a,
+   const std::vector<cv::KeyPoint> & keypoints_b,
+   const cv::Mat1f & descriptors_b
 ){
    const double max_feature_distance = 1e4;
 
@@ -59,8 +93,13 @@ std::vector<std::pair<Vector2, Vector2>> MatchFeatures(
    }
    std::cout << "Found " << initial_matches.size() << " initial matches" << std::endl;
 
+   if(initial_matches.size() < 8)
+   {
+      return std::vector<std::pair<Vector2,Vector2>>();
+   }
+
    // use ransac to find a decent fundamental matrix
-   //
+   Matrix33 F = FundamentalRansac(initial_matches);
 
    // find matches constrained by fundamental matrix
    std::vector<std::pair<Vector2, Vector2>> final_matches;
@@ -70,9 +109,9 @@ std::vector<std::pair<Vector2, Vector2>> MatchFeatures(
 
 
 cv::Mat3b RenderMatches(
-   const cv::Mat3b& image_a,
-   const cv::Mat3b& image_b,
-   const std::vector<std::pair<Vector2,Vector2>>& matches
+   const cv::Mat3b & image_a,
+   const cv::Mat3b & image_b,
+   const std::vector<std::pair<Vector2,Vector2>> & matches
 ){
    cv::Mat3b render(image_a.size());
    for(int r = 0; r < render.rows; ++r)
