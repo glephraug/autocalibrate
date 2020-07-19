@@ -12,7 +12,7 @@ std::vector<std::pair<Vector2, Vector2>> MatchFeatures(
    const std::vector<cv::KeyPoint>& keypoints_b,
    const cv::Mat1f& descriptors_b
 ){
-   const double max_feature_distance = 0.8;
+   const double max_feature_distance = 1e4;
 
    // find initial matches via brute force
    std::cout << "Find initial matches..." << std::endl;

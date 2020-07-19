@@ -25,11 +25,10 @@ int main(int argc, char** argv)
    cv::Mat3b image_a = cv::imread(argv[1]);
    cv::Mat3b image_b = cv::imread(argv[2]);
 
+   // Scale down the images to something more managable
    double scale = std::min(1.0, 480.0/image_a.rows);
-
    cv::resize(image_a, image_a, cv::Size(), scale, scale);
    cv::resize(image_b, image_b, cv::Size(), scale, scale);
-
 
    // Detect features in both images
    cv::Ptr<cv::SIFT> detector = cv::SIFT::create();
@@ -49,6 +48,8 @@ int main(int argc, char** argv)
 
    // Find feature matches
    std::vector<std::pair<Vector2, Vector2>> matches = MatchFeatures(keypoints_a, descriptors_a, keypoints_b, descriptors_b);
+   cv::imshow("matches", RenderMatches(image_a, image_b, matches));
+   cv::waitKey(-1);
 
    // Optimize for pose and calibration
    Matrix33 rotation = Matrix33::Identity();
@@ -57,6 +58,10 @@ int main(int argc, char** argv)
    double focal = 1e3;
 
    Autocalibrate(matches, rotation, translation, center, focal);
+   
+   // Undo the scaling so our data matches the original image sizes
+   center /= scale;
+   focal /= scale;
 
    std::cout << "Estimated rotation:" << std::endl << rotation << std::endl;
    std::cout << "Estimated translation: " << translation.transpose() << std::endl;
